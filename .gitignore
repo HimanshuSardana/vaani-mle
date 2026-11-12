@@ -1,0 +1,11 @@
+# secrets: the Groq key lives here and must never be committed
+.env
+
+# python
+.venv/
+__pycache__/
+*.py[cod]
+
+# runtime state written by the pipeline
+.state/
+standin.log

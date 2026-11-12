@@ -1,0 +1,22 @@
+[project]
+name = "vaani-mle"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Himanshu Sardana", email = "himanshusardana2005@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "torch>=2.15.0",
+]
+
+[project.scripts]
+vaani-mle = "vaani_mle:main"
+
+[[tool.uv.index]]
+url = "https://download.pytorch.org/whl/cpu"
+
+[build-system]
+requires = ["uv_build>=0.12.14,<0.13.0"]
+build-backend = "uv_build"
