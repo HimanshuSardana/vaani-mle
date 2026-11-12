@@ -1,206 +1,242 @@
-#set page(paper: "a4", margin: 2cm)
-#set text(size: 9.5pt)
-#set table(stroke: 0.6pt + luma(170), inset: (x: 5pt, y: 3.5pt))
-#set heading(numbering: "1.")
-#show table: set text(size: 8pt)
+#set page(paper: "a4", margin: (x: 1.2cm, y: 1.2cm), columns: 2)
+#set text(size: 9.6pt)
+#set par(leading: 0.55em, justify: true, spacing: 0.75em)
+// #set heading(numbering: "1.")
+#show heading: it => smallcaps()[#text(size: 10pt, it)]
+#show heading: set block(above: 0.6em, below: 0.6em)
+#set table(stroke: 1pt + black, inset: (x: 3pt, y: 3pt))
+#show table: set text(size: 7.4pt)
+#set figure(supplement: none)
+#show figure.where(kind: table): set figure.caption(position: bottom)
+#show figure.caption: set text(size: 7.6pt, style: "italic")
 
-#align(center)[
-  #text(size: 15pt, weight: "bold")[The Relay]
-  #linebreak()
-  #text(size: 11pt)[Results tables]
-  #v(2pt)
+#place(scope: "parent", float: true, top + center)[#align(center)[#text(
+    size: 13pt,
+    weight: "bold",
+  )[#smallcaps()[The Relay]] \ #text(
+    size: 9.5pt,
+  )[By Himanshu Sardana (#underline()[#link("himanshu.co")[himanshu.co])]]]]
+
+#box(width: 100%, inset: 8pt, stroke: 1pt)[
+  GitHub Repo:
+  #underline()[#link("https://github.com/HimanshuSardana/vaani-mle")[https://github.com/HimanshuSardana/vaani-mle]]
+  \
+  *PS*: I also built a Next.js website as an interface for this RAG chatbot, I'd love for you
+  guys to have a look at it at
+  #underline()[#link("vaani-mle.himanshu.co")[vaani-mle.himanshu.co]]
 ]
 
-All limits below are for a single model on the Groq free tier. Unless stated
-otherwise the model is `openai/gpt-oss-20b`; limits are enforced per model, so a
-second model carries its own independent bucket.
+= What I built and why
+
+A retrieval service over three papers Attention Is All You Need
+Moshi and Dynamic Chunking. Every response carries
+a citation listing the paper, section and page, A question the papers do not answer/ is irrelevant is
+refused.
+
+The pipeline consists of four steps. First, match which paper the question targets and whether it wants a
+prose answer or a number, achieved via plain keyword matching, for question types (prose
+or number, I simply check for keywords such as "how much", "how many", etc.) I tried routing with `allam-2-7b` at
+64 tokens and dropped it because name matching was just as accurate and faster. Second, keyword
+search over 225 pieces returns 12 candidate chunks, chunks belonging to the possible
+matched paper are scored 1.5 times higher, for numeric questions the chunks containing
+tables are scored 1.5 times since tables are much more likely to contain a numeric answer. Third, one
+draft call to `openai/gpt-oss-20b` capped at 320 tokens with low reasoning. Fourth, resolve
+every citation against a retrieved passage and delete any that does not resolve.
+
+Each request gets 8 seconds and there is no queue, so
+the answer degrades until it fits. It keeps 3 passages instead of 4, then skips the
+reordering pass, then stops calling the model and quotes the retrieved sentences with
+citations attached, then refuses. The level is chosen from remaining time and remaining
+token budget, so a busy system answers worse rather than answering late. Nobody waits.
+
+
+= Groq's Limits and Stand-in
 
 #figure(
   table(
-    columns: (auto, 1fr, 1.5fr, auto),
+    columns: (auto, auto, 1fr, 3.8em),
     align: (left, left, left, left),
-    table.header(
-      [*Limit*], [*Value found*], [*How I found it*], [*Confidence*],
-    ),
-    [Requests per minute], [30],
-    [Console limits page. Sequential probing cannot exceed this cap, so it was
-      not independently confirmed; the 429 body reports RPM in the same format
-      ("RPM: Limit 3, Used 3"), which corroborates the mechanism.],
-    [medium],
-
-    [Tokens per minute], [8\,000],
-    [`x-ratelimit-limit-tokens` on every response, constant across the run.],
-    [high],
-
-    [Requests per day], [1\,000],
-    [`x-ratelimit-limit-requests` on every response. Note this header is the
-      *daily* request budget, not the per-minute one.],
-    [high],
-
-    [Tokens per day], [200\,000],
-    [Console limits page (TOKENS PER DAY column). Not exposed in any response
-      header.],
-    [high],
-
-    [Requests in flight at once], [at least 8, no limit observed],
-    [Fired 8 concurrent requests at `allam-2-7b`; 8 succeeded, 0 rate-limited.
-      Untested above 8.],
-    [high],
-
-    [What it returns when a limit is hit],
-    [HTTP 429 with `type: requests` and `code: rate_limit_exceeded`, a
-      `retry-after` header in seconds, and a human-readable message quoting the
-      limit and the wait. Body quoted below.],
-    [high],
-    [high],
-
-    [Time until it recovers], [20.3 s],
-    [Tripped a 429 on `openai/gpt-oss-safeguard-20b`, honoured `retry-after: 20`,
-      retried once, succeeded after 20.3 s wall clock.],
-    [high],
-
-    [Measured token ceiling], [8\,848 tokens / 60 s],
-    [Maximum tokens completed in any rolling 60 s window across `probe.jsonl`.
-      Sits above the 8\,000 header because the window spans model switches and
-      bucket resets, whereas `x-ratelimit-limit-tokens` is a per-model bucket.
-      The header is authoritative for gating; this is an upper bound.],
-    [medium],
+    table.header([*Limit*], [*Found*], [*How*], [*Conf.*]),
+    [Requests per minute], [30], [console page; 429 body quotes RPM], [medium],
+    [Tokens per minute], [8\,000], [`x-ratelimit-limit-tokens`, constant], [high],
+    [Requests per day], [1\,000], [`x-ratelimit-limit-requests`], [high],
+    [Tokens per day], [200\,000], [console page, never in a header], [high],
+    [Requests in flight], [at least 8], [8 concurrent succeeded, none limited], [high],
+    [Reply at a limit], [HTTP 429], [`rate_limit_exceeded` plus `retry-after`], [high],
+    [Time to recover], [20.3 s], [honoured `retry-after: 20`, retried once], [high],
   ),
-  caption: [Limits found in the real service (Groq free tier, `openai/gpt-oss-20b`
-    unless stated)],
+  caption: [Limits found on the free tier for `openai/gpt-oss-20b`.],
 )
+
+Three buckets run on three clocks: requests per day, tokens per minute, and a per-model
+request cap that appears only in a 429 body and never in a header. So the client reads
+`x-ratelimit-remaining-tokens` instead of counting, because a rolling 60 s window completed
+8\,848 tokens against an 8\,000 declaration and local arithmetic would have over-throttled.
+
+The stand-in acts as a mock API, streams SSE, enforces rpm, tpm, rpd and tpd per model,
+returns Groq-shaped 429 bodies, and can inject failures, slow successes and load slowdown.
+The two limit rows below run on it with tokens per minute cut to 4\,000 and tokens per day
+set to zero, shapes the real tier will not give me without spending a day of budget.
+Time to first token is bootstrapped from measured samples in four input-length bands of 33,
+5, 6 and 1 observations, with bands under 8 samples pooled at draw time, and a 70-token
+template overhead that took tokenizer error from 0.5965 to 0.0001 below 400 tokens. Least
+like the real service: it cannot exceed its own observed maximum, so slow tails are
+reproduced rather than invented, and it echoes prompt text so it cannot answer at all,
+which is why every quality number below comes from the real service.
+
+= Results
 
 #figure(
   table(
     columns: (auto, auto, auto, auto, auto, auto, auto),
     align: (left, left, right, right, right, right, right),
-    table.header(
-      [*Scenario*], [*Source*], [*Requests sent*], [*Duration (s)*],
-      [*Offered rate (/min)*], [*First token p50 / p95 / p99 (ms)*],
-      [*Total time p50 / p95 / p99 (ms)*],
-    ),
+    table.header([*Scenario*], [*Source*], [*Sent*], [*Sec*], [*Offered*], [*First token*], [*Total*]),
     [steady], [real], [6], [100], [3.6], [1755 / 3491 / 3491], [1756 / 3492 / 3492],
     [burst], [real], [20], [2], [600.0], [6982 / 8134 / 8134], [6982 / 8135 / 8135],
-    [sustained overload], [real], [40], [116], [20.7], [1221 / 4364 / 5391], [1222 / 4364 / 5392],
-    [per-minute limit halved], [stand-in], [40], [123], [19.5], [7 / 7076 / 7662], [7 / 7077 / 7662],
-    [daily budget exhausted], [stand-in], [5], [24], [12.5], [not measured], [not measured],
+    [overload], [real], [40], [116], [20.7], [1221 / 4364 / 5391], [1222 / 4364 / 5392],
+    [halved], [stand-in], [40], [123], [19.5], [7 / 7076 / 7662], [7 / 7077 / 7662],
+    [daily], [stand-in], [5], [24], [12.5], [not measured], [not measured],
   ),
-  caption: [Latency per load scenario. Percentiles are over successful responses
-    only, since a rate-limited request never produced a first token: n = 6, 5, 21,
-    15 and 0 respectively. Where n is below 30 the p99 is the largest sample, not
-    a tail estimate.],
+  caption: [Latency, p50 / p95 / p99 in ms, over successful responses only: n = 6, 4, 13,
+    15 and 0. Where n is under 30 the p99 is the maximum sample.],
 )
 
 #figure(
   table(
     columns: (auto, auto, auto, auto, auto, auto, auto, auto),
     align: (left, right, right, right, right, right, right, right),
-    table.header(
-      [*Scenario*], [*Succeeded %*], [*Rate-limited %*],
-      [*Timed out or given up %*], [*Retries per request*], [*Peak queue*],
-      [*Tokens per answer*], [*Cost per 1\,000 answers*],
-    ),
+    table.header([*Scenario*], [*OK %*], [*429 %*], [*Given up %*], [*Retries*], [*Queue*], [*Tok/ans*], [*Cost*]),
     [steady], [100.0], [0.0], [0.0], [0.00], [0], [129.5], [0.00],
     [burst], [20.0], [75.0], [5.0], [0.80], [0], [130.8], [0.00],
-    [sustained overload], [32.5], [60.0], [7.5], [0.85], [0], [88.2], [0.00],
-    [per-minute limit halved], [37.5], [60.0], [2.5], [0.75], [0], [52.3], [0.00],
-    [daily budget exhausted], [0.0], [100.0], [0.0], [1.00], [0], [0.0], [0.00],
+    [overload], [32.5], [60.0], [7.5], [0.85], [0], [88.2], [0.00],
+    [halved], [37.5], [60.0], [2.5], [0.75], [0], [52.3], [0.00],
+    [daily], [0.0], [100.0], [0.0], [1.00], [0], [0.0], [0.00],
   ),
-  caption: [Outcomes per load scenario. Peak queue is 0 everywhere because the
-    pipeline never queues: it answers from fewer chunks, answers extractively, or
-    refuses, and surplus load becomes a 429 or a \"system busy\" refusal. Four
-    requests were turned away that way, three in sustained overload and one in the
-    halved run.],
+  caption: [Outcomes. Cost is per 1\,000 answers and is zero on the free tier; peak queue
+    is recoverable from `queued_ms` and is a real zero.],
 )
 
-The burst duration reads as 2 s because `start_time` was recorded to the second, so
-a 4 s arrival window collapsed; 600 per minute is what the file yields, while the run
-fired 20 requests at 300 per minute by construction. Sustained overload crossed two
-limits inside one run: 12 rejections name tokens per minute and 13 name tokens per
-day, because the run drained the remaining daily budget while it was going. That is
-the daily limit arriving under load rather than at 3pm, and the \"daily budget
-exhausted\" row is the same wall reached from a cold start.
+`results.csv` holds 186 rows: 75 graded answers and 111 load requests, each failure stating
+which limit rejected it. Answer quality is 60.0 % correct on each of three retrieval
+settings, 15 questions each, with 13.3 to 20.0 % wrong and 20.0 % correctly refused.
+Failures across all rows: 49 rejected on tokens per minute, 19 on tokens per day, 3
+refused at capacity, 2 past the deadline. Steady answered everything; burst answered 4 of
+20 with `retry-after` between 6 and 17 s; overload crossed both limits inside one run, 12
+rejections naming the minute and 13 naming the day. The number I could not have guessed:
+the 429 that said `retry-after: 470` said "try again in 2.0025s" in its own body. Two
+caveats on the tables. Burst reads 600 offered per minute because `start_time` was recorded
+to the second when that row ran, so a 4 second arrival window collapsed; the run fired at
+300 per minute by construction. And the 111 load rows carry an empty `answer_grade`, because
+they measure latency and outcomes, not accuracy; the 75 graded rows are the quality run.
 
-Peak queue is a real zero, recoverable from `queued_ms` in `results.csv`: no request
-spent time waiting for a slot. That is a property of the design, not of the load. The
-ladder absorbs pressure by answering worse instead of holding the request, so nobody
-is delayed and a few people are dropped. Seventeen successful requests made no draft
-call at all (rung 3, extractive), which is why tokens per answer collapses under load
-and why the halved run's first-token p50 is 7 ms.
+= Where the time goes
 
-All five scenarios cost 46\,128 tokens in total, and 37\,083 of that is the real
-service. Cost per 1\,000 answers is 0.00 because the free tier charges nothing; the
-binding constraint is tokens per day, not money.
+Burst Q03, 8\,135 ms end to end: keyword search 1.6 ms, cross-encoder reordering 463.6 ms
+over 12 pairs, first token 7\,537 ms, generation 130 ms, citation check 0.4 ms. Waiting is
+the 464 ms of ours that happens before the model is called, working is the 7\,537 ms inside
+the call, and there is nothing to retry. So 93 % of
+the wait is before the first token and 5.7 % is mine. Quality Q15 with two retries spent
+8\,088 ms while its draft first token took 1\,840 ms, so 5.8 seconds of that request is
+retry sleep, also before the first token, which is the worst place because nothing is on
+screen yet. Every request writes per-stage milliseconds to `traces/`; Groq's own
+`queue_time`, `prompt_time` and `completion_time` arrive in the response but are not copied
+into the trace, so this split is client-side.
 
-#figure(
-  table(
-    columns: (auto, auto, auto, auto, auto, auto, auto, auto),
-    align: (left, right, right, right, right, right, right, right),
-    table.header(
-      [*Setting*], [*Questions asked*], [*Correct and cited %*], [*Wrong %*],
-      [*Correctly refused %*], [*Tokens per answer*],
-      [*First token p50 / p95 (ms)*], [*Total time p50 / p95 (ms)*],
+= When a limit is hit
+
+At the minute limit the pipeline returns the 429 immediately with the wait the server
+named, because a wait longer than the deadline cannot help; burst rejected 15 of 20 that
+way while the first four were answered. The ladder thresholds are read from the same bucket
+the header reports: under 2\,600 remaining tokens it stops reordering, under 1\,500 it keeps
+three passages, under 700 it answers extractively, and under 300 it refuses. At the day limit every attempt fails, so it stops
+trying and says the quota is spent; daily rejected 5 of 5 from the first request. Delayed:
+nobody, peak queue is zero in every scenario. Dropped: 25 rejected, 3 refused at capacity,
+2 past the deadline. Given a weaker answer: 14 requests answered extractively with no
+model call, which is why tokens per answer falls to 88.2 under overload against 130.8 at
+steady.
+
+= Retries
+
+At most two attempts, only on 429, timeout or 5xx, the wait taken from the response body,
+and no wait longer than the time left on the deadline. Retrying made things worse once, in
+the way that matters: an early version honoured `retry-after: 868` inside an 8 second
+deadline, so one request slept 14.5 minutes and then timed out anyway, spending nothing and
+producing nothing. The load runs repeat the lesson cheaply: burst spent 0.80 retries per
+request and rescued nothing, since the four successes were through on their first attempt,
+and overload spent 0.85 while leaving p95 at 4\,364 ms against p50 1\,221 ms.
+
+= What the person sees
+
+At 3pm with the day spent, the reply is: "The assistant has used its daily model quota and
+cannot answer until it resets. Try again in about 60 seconds." That is a fix. The first
+version reused the refusal sentence, so a spent quota read "Not stated in the provided
+papers. Upstream rate_limited.", which tells a waiting person the library lacks the answer
+when the library is fine. There are now four messages, one for the day limit, the minute
+limit, a blown deadline and the at-capacity step, and a test asserts none of them contains
+the refusal sentence.
+
+= What I'm unsure about, what I left out, what I learned
+
+Least certain: that a bootstrap over four bands, three of them sparse, imitates a
+200-request scenario. If it is wrong, my stand-in rows understate slow tails and the
+overload rows look better than the real service would. Also thin: 15 questions tie three
+settings at 60 %, which cannot separate settings that differ by one answer. Deliberately not
+built: an admission queue, which is why peak queue is zero, and runtime switching of piece
+size, fixed at process start. New to me: `max_tokens` caps reasoning tokens as well as answer tokens, so a
+40-token budget returned a successful call with 38 reasoning tokens and an empty answer,
+which means truncation must count as failure or it inflates the success rate and mimics a
+refusal.
+
+= Retrieval: quality versus cost
+
+#place(float: true, top, scope: "parent")[
+  #figure(
+    table(
+      columns: (1fr, auto, auto, auto, auto, auto, auto, auto),
+      align: (left, right, right, right, right, right, right, right),
+      table.header(
+        [*Setting*], [*Q*], [*Correct %*], [*Wrong %*], [*Refused %*], [*Tok/ans*], [*First token*], [*Total*]
+      ),
+      [A: 1200-char, 4 kept, no re-rank], [15], [60.0], [13.3], [20.0], [96], [1272 / 2193], [1370 / 2282],
+      [B: 3000-char, 6 kept, re-rank], [15], [60.0], [20.0], [20.0], [115], [2577 / 4614], [2584 / 4649],
+      [C: 6000-char, 8 kept, re-rank], [15], [60.0], [13.3], [20.0], [109], [1780 / 4927], [1888 / 4932],
     ),
-    [A: 1200-char pieces, 4 fetched, no re-rank], [15], [60.0], [13.3], [20.0],
-      [96], [1272 / 2193], [1370 / 2282],
-    [B: 3000-char pieces, 6 fetched, re-rank], [15], [60.0], [20.0], [20.0],
-      [115], [2577 / 4614], [2584 / 4649],
-    [C: 6000-char pieces, 8 fetched, re-rank], [15], [60.0], [13.3], [20.0],
-      [109], [1780 / 4927], [1888 / 4932],
-  ),
-  caption: [Three retrieval settings, each on the same 15 questions. Tokens per
-    answer is the mean completion length; prompt length averaged 1485, 2111 and
-    2519 tokens respectively. Total time is first token plus the rest of the
-    draft, so it excludes the citation check.],
-)
+    caption: [Three settings on the same 15 questions. p50 / p95 in ms. Correct means correct
+      and cited.],
+  )
+]
 
-All three settings answer 60.0 % correctly, so piece size and re-ranking made no
-difference to quality on these 15 questions, and the choice falls to cost and
-latency. A is the cheapest and fastest by a wide margin: 1485 prompt tokens and a
-1272 ms first token, against 2519 and 1780 ms for C. The gap is the reranker, which
-C runs over 12 pairs and A does not run at all.
+All three tie at 60.0 %, so cost decides and the answer is A: 96 output tokens and
+1\,272 ms to first token, against 115 and 2\,577 ms for B and 109 and 1\,780 ms for C.
+Reordering costs about 1.3 s of first token here and changed nothing, because the right
+passage was already in the top four on 9 of 12 questions. When a limit is close the ladder
+keeps 3 passages instead of 4, then drops reordering, then answers extractively.
 
-What the settings do change is which questions fail. Q12 fails in all three, because
-the retriever matches the words "BPE" and "tokenizer" wherever they appear, and
-H-Net's own introduction and appendix discuss BPE the most. Q11 fails three different
-ways: A refuses, B claims Helium and Moshi are both 7B and calls a 1.3B baseline the
-largest model, and C refuses. Q01 is answered correctly only by A, which states the
-"n smaller than d" condition; B answers with a training-speed claim from the
-conclusion, and C states the condition backwards, saying the advantage holds for long
-sequences.
+= How this library will mislead a naive retriever
 
-I choose A. Re-ranking would cost about 1.3 s of first token on the C measurement and
-change nothing on these 15 questions, so A keeps 1200-character pieces, 4 fetched
-pieces and no re-rank. When the limit is close the ladder does the rest without
-changing piece size: rung 1 keeps 3 chunks instead of 4, rung 2 turns re-ranking off,
-and rung 3 answers extractively from the top 3 spans with no draft call at all.
+Gold-passage recall is 0.848 at k of 4, 6 and 8, perfect on 9 of 12 questions, and the
+three misses are three distinct traps. Questions naming no paper: "the parameter counts of
+the three headline models" needs a passage from each, recall is 0 at every k, and it is
+refused in A and C because the per-paper search never runs without a named paper.
+Vocabulary that does not match the source: "which papers rely on BPE tokenization" fails in
+all three settings, since one paper says byte-pair encoding and another discusses it in an
+appendix, so the answer cites H-Net's appendix instead of the Transformer. Long pieces
+burying the sentence: "how much faster is self-attention than recurrent layers" is answered
+only with 1200-character pieces, because at 6000 the operative sentence sits past the
+1\,000-character cut applied to each passage.
 
-= What it returns when a limit is hit
+= Your feedback on Vaani
+I did tinker around with #underline()[#link("vaani.dev")[vaani.dev]] a bit to get a feel for what you guys do
 
-Verbatim body, `openai/gpt-oss-safeguard-20b`, `retry-after: 20`:
+= How I worked with the assistant
+My entire agent session transcript is available at: #underline()[#link("https://pi.dev/session/#088e20bd4a25ab3a0f78039e9a34d2ad")[https://pi.dev/session/#088e20bd4a25ab3a0f78039e9a34d2ad]]
 
-```json
-{"error":{"message":"Rate limit reached for model `openai/gpt-oss-safeguard-20b` in organization `org_01j4f5qxt6ehjrv71h1wdry0z0` service tier `on_demand` on requests per minute (RPM): Limit 3, Used 3, Requested 1. Please try again in 20s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"requests","code":"rate_limit_exceeded"}}
-```
+= Gallery
+Padding this extra space with images of the Next.js site I built, cuz why not :p (pls
+visit: #underline()[#link("vaani-mle.himanshu.co")[vaani-mle.himanshu.co]])
 
-= Notes on these measurements
 
-- *The three buckets are on three different clocks.* Requests are limited per
-  day, tokens per minute, and individual models can carry their own per-minute
-  request cap that appears only in the 429 body, never in a header. A limiter
-  that assumes one uniform window will 429 itself while it believes it has
-  headroom.
-
-- *No `rpm` field exists anywhere in the API surface.* `x-ratelimit-limit-requests`
-  means requests per *day*. Reading it as a per-minute limit would over-throttle
-  by a factor of 1\,000.
-
-- *Bursts are admitted above the per-minute token limit* (8\,848 measured against
-  8\,000 declared), so the bucket is not a strict sliding window. Client-side
-  gating therefore reads `x-ratelimit-remaining-tokens` rather than computing its
-  own.
-
-- *`max_tokens` caps reasoning tokens as well as answer tokens.* With
-  `reasoning_effort` set, a 40-token budget returned `status: ok` with 38 reasoning
-  tokens and an empty answer. Truncation must be classified as a failure, not a
-  success, or it inflates the succeeded rate and mimics a refusal.
+#image("assets/1.png", width: 100%)
+#image("assets/2.png", width: 100%)
+#image("assets/3.png", width: 100%)
+#image("assets/4.png", width: 100%)
