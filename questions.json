@@ -1,0 +1,288 @@
+{
+ "refusal_contract": {
+  "sentence": "not stated in the provided papers.",
+  "format": "not stated in the provided papers. <one-line reason>",
+  "one_line_reason": true,
+  "match_rule": "case-insensitive substring match of `sentence` after whitespace normalisation",
+  "documentation": [
+   "A model judge reads each answer and labels it, so no code decides correctness.",
+   "An answer is a refusal iff it contains the sentence above, after whitespace normalisation and case folding.",
+   "required_facts/forbidden_facts are shown to the judge as what the question turns on; they are not string-matched.",
+   "An answer that states the fact but in a different phrasing, word order, plural or number format is correct. A judge that rejects it is wrong, not strict.",
+   "refused_correctly requires expect == unanswerable; refused_wrongly means the answer refused an answerable question."
+  ]
+ },
+ "citation_regex": "\\[(\\d{4}\\.\\d{4,5})(?:v\\d+)?\\s*§[^\\]\\n]{1,120}?\\s*p\\s?(\\d+)\\]",
+ "grading_rules": {
+  "judge": "a model reads the question, the answer, the cited passages and the paper text, and writes one line into judgments.jsonl",
+  "apply": "python scripts/apply_judge.py fills answer_grade in results.csv from judgments.jsonl",
+  "correct": "not a refusal, the facts the question turns on are all stated, no forbidden fact is present, and at least one citation names a paper, section and page",
+  "wrong": "not a refusal, and a fact is missing, misattributed to the wrong paper, contradicted, or uncited",
+  "refused_correctly": "refusal on a question with expect == unanswerable",
+  "refused_wrongly": "refusal on a question with expect == answerable, including refusing because the daily or per-minute limit was hit",
+  "citation_regex": "\\[(\\d{4}\\.\\d{4,5})(?:v\\d+)?\\s*§[^\\]\\n]{1,120}?\\s*p\\s?(\\d+)\\]",
+  "answer_grade_gate": "answer_grade stays empty unless status == ok; failed requests are counted in the failure columns, never in the quality denominator",
+  "note": "required_facts and forbidden_facts below are judge guidance. Several answers were previously marked wrong for '4,096' vs '4096' and 'generation more stable' vs 'more stable generations'; the judge accepts those."
+ },
+ "questions": [
+  {
+   "id": "Q01",
+   "question": "How much faster is self-attention than recurrent layers, and when is that true?",
+   "paper": "1706.03762",
+   "expect": "answerable",
+   "gold_section_path": "4 Why Self-Attention",
+   "gold_chunk_ids": [
+    "1706.03762v7-0015"
+   ],
+   "required_facts": [
+    "faster than recurrent layers"
+   ],
+   "forbidden_facts": [],
+   "notes": "Prose. Chunk states self-attention is faster when sequence length n < representation dim d. Table 1 (1706.03762v7-0016, p6) is acceptable table evidence but is not required. Retrieved rank 3 for the plain query."
+  },
+  {
+   "id": "Q02",
+   "question": "Which optimizer did the Transformer use, and what beta2 value?",
+   "paper": "1706.03762",
+   "expect": "answerable",
+   "gold_section_path": "5 Training > 5.3 Optimizer",
+   "gold_chunk_ids": [
+    "1706.03762v7-0019"
+   ],
+   "required_facts": [
+    "Adam",
+    "0.98"
+   ],
+   "forbidden_facts": [
+    "0.999"
+   ],
+   "notes": "Prose. Chunk also gives beta1=0.9 and eps=1e-9; forbidden 0.999 is the Adam default, i.e. a wrong read. Retrieved rank 1."
+  },
+  {
+   "id": "Q03",
+   "question": "What is Inner Monologue and why does Moshi model text tokens of its own speech?",
+   "paper": "2410.00037",
+   "expect": "answerable",
+   "gold_section_path": "3 Model > 3.4 Generative Audio Modeling > 3.4.4 Inner Monologue",
+   "gold_chunk_ids": [
+    "2410.00037v1-0056",
+    "2410.00037v1-0057"
+   ],
+   "required_facts": [
+    "scaffolding",
+    "Whisper"
+   ],
+   "forbidden_facts": [],
+   "notes": "Prose. 0056: text stream acts as scaffolding that lifts linguistic quality. 0057: word-level Whisper timestamps align text to the 12.5Hz audio framerate. Query with the word 'monologue' retrieved 0056 at rank 5 but missed 0057."
+  },
+  {
+   "id": "Q04",
+   "question": "Why does Moshi delay the semantic and acoustic token streams?",
+   "paper": "2410.00037",
+   "expect": "answerable",
+   "gold_section_path": "3 Model > 3.4 Generative Audio Modeling > 3.4.2 Audio modeling > Acoustic delay.",
+   "gold_chunk_ids": [
+    "2410.00037v1-0054"
+   ],
+   "required_facts": [
+    "more stable generations"
+   ],
+   "forbidden_facts": [],
+   "notes": "Prose. A slight delay reduces dependencies between sub-sequences at a time step, so a weaker model can approximate the joint distribution. Retrieved rank 2."
+  },
+  {
+   "id": "Q05",
+   "question": "Why is a ratio loss needed for the dynamic chunking module?",
+   "paper": "2507.07955",
+   "expect": "answerable",
+   "gold_section_path": "2 H-Net Architecture > 2.2 Dynamic Chunking (DC) > 2.2.3 Ratio Loss",
+   "gold_chunk_ids": [
+    "2507.07955v2-0164"
+   ],
+   "required_facts": [
+    "trivial solutions"
+   ],
+   "forbidden_facts": [],
+   "notes": "Prose. Without regularisation the model keeps nearly all vectors or compresses excessively; ratio loss guides the target compression. Retrieved rank 1."
+  },
+  {
+   "id": "Q06",
+   "question": "What BLEU does the big Transformer get on English to German?",
+   "paper": "1706.03762",
+   "expect": "answerable",
+   "gold_section_path": "6 Results > 6.1 Machine Translation",
+   "gold_chunk_ids": [
+    "1706.03762v7-0023"
+   ],
+   "required_facts": [
+    "28.4",
+    "english-to-german"
+   ],
+   "forbidden_facts": [
+    "27.3",
+    "25.8",
+    "41.8"
+   ],
+   "notes": "TABLE-ONLY. 28.4 sits in Table 2 (EN-DE, Transformer big); 27.3 is the base-model row, 41.8 the EN-FR cell of the same row, 25.8 the base-model BLEU in Table 3 (Q07). The task direction must be stated as 'english-to-german' or 'en-de' (see required_facts_any). Text chunk 1706.03762v7-0022 also states 28.4, but the table is the primary source. Retrieved rank 1.",
+   "required_facts_any": [
+    [
+     "english-to-german",
+     "en-de"
+    ]
+   ]
+  },
+  {
+   "id": "Q07",
+   "question": "What dev-set perplexity and parameter count does the base Transformer report?",
+   "paper": "1706.03762",
+   "expect": "answerable",
+   "gold_section_path": "6 Results > 6.2 Model Variations",
+   "gold_chunk_ids": [
+    "1706.03762v7-0025"
+   ],
+   "required_facts": [
+    "4.92",
+    "65"
+   ],
+   "forbidden_facts": [
+    "4.33",
+    "213"
+   ],
+   "notes": "TABLE-ONLY. Table 3 'base' row: PPL(dev) 4.92, params 65 x10^6. Forbidden 4.33/213 are the 'big' row, one line below - a wrong read shows those. Retrieved rank 1."
+  },
+  {
+   "id": "Q08",
+   "question": "How many layers, and what context size, does Helium use according to its hyper-parameter table?",
+   "paper": "2410.00037",
+   "expect": "answerable",
+   "gold_section_path": "3 Model > 3.2 The Helium Text Language Model > 3.2.1 Architecture",
+   "gold_chunk_ids": [
+    "2410.00037v1-0037"
+   ],
+   "required_facts": [
+    "32",
+    "4096"
+   ],
+   "forbidden_facts": [
+    "11264"
+   ],
+   "notes": "TABLE-ONLY. Table 1: Number of layers 32, Context size 4096 (Helium training). 11264 is the MLP-dimension row directly beneath - wrong read. Retrieved rank 1."
+  },
+  {
+   "id": "Q09",
+   "question": "What MOSNet and MUSHRA scores does Mimi with adversarial loss only achieve?",
+   "paper": "2410.00037",
+   "expect": "answerable",
+   "gold_section_path": "5 Evaluation > 5.2 Audio Tokenization > Baselines.",
+   "gold_chunk_ids": [
+    "2410.00037v1-0077"
+   ],
+   "required_facts": [
+    "3.10",
+    "81.0"
+   ],
+   "forbidden_facts": [
+    "2.89",
+    "58.8",
+    "3.12"
+   ],
+   "notes": "TABLE-ONLY. Table 4: Mimi (adv. loss only) MOSNet 3.10, MUSHRA 81.0. Forbidden 2.89/58.8 are the 'non adv. only' Mimi row; 3.12 is the SemantiCodec 3kbps row. Retrieved rank 2."
+  },
+  {
+   "id": "Q10",
+   "question": "What final perplexity does the 64M H-Net reach on the Chinese/code benchmarks (Table 4)?",
+   "paper": "2507.07955",
+   "expect": "answerable",
+   "gold_section_path": "3 Experiments > 3.2 Alternate Language Datasets > Experimental setup for Chinese and code.",
+   "gold_chunk_ids": [
+    "2507.07955v2-0186"
+   ],
+   "required_facts": [
+    "2.705",
+    "64M"
+   ],
+   "forbidden_facts": [
+    "2.697",
+    "2.769"
+   ],
+   "notes": "TABLE-ONLY. Table 4 is the Chinese/code benchmark table (caption in 2507.07955v2-0185): H-Net (M3T1+T15+M4) 64M -> 2.705 final PPL. Forbidden 2.697 is the 66M row two lines below, 2.769 is the Transformer (T9) 29M row. Retrieved rank 1."
+  },
+  {
+   "id": "Q11",
+   "question": "What are the parameter counts of the three headline models?",
+   "paper": null,
+   "expect": "answerable",
+   "gold_section_path": "1706.03762: 6 Results > 6.2 Model Variations | 2410.00037: 3 Model > 3.2 The Helium Text Language Model > 3.2.1 Architecture | 2507.07955: 3 Experiments > 3.2 Alternate Language Datasets > Experimental setup for Chinese and code.",
+   "gold_chunk_ids": [
+    "1706.03762v7-0025",
+    "2410.00037v1-0037",
+    "2507.07955v2-0186"
+   ],
+   "required_facts": [
+    "7B",
+    "213",
+    "64M"
+   ],
+   "forbidden_facts": [],
+   "notes": "MULTI-PAPER, deliberately kept in natural wording. Transformer big = 213 x10^6 (Table 3), Moshi/Helium = 7B (Table 1 caption, also section 1), H-Net = 64M (Chinese/code table). KNOWN MISS: the natural question says 'parameter counts', the table headers say 'Params.', and BM25 does not stem, so the answer chunks rank outside top-8 for a single global query. This is intended to stay unrewarded by plain retrieval and to be recovered only by per-paper retrieval + union, not by rewording the question. Do not 'fix' this entry by adding 'params' to the question: that fits the benchmark to the retriever and inflates the table axis. Gold for Moshi is the table (2410.00037v1-0037), not the prose intro chunk (…-0030), which no phrasing retrieves."
+  },
+  {
+   "id": "Q12",
+   "question": "Which of these papers rely on BPE tokenization, and which one avoids a fixed tokenizer?",
+   "paper": null,
+   "expect": "answerable",
+   "gold_section_path": "1706.03762: 5 Training > 5.1 Training Data and Batching | 2507.07955: 1 Introduction",
+   "gold_chunk_ids": [
+    "1706.03762v7-0017",
+    "2507.07955v2-0146",
+    "2507.07955v2-0150"
+   ],
+   "required_facts": [
+    "byte-pair",
+    "tokenizer-free"
+   ],
+   "forbidden_facts": [],
+   "notes": "MULTI-PAPER. 1706 encodes with BPE (~37000 shared vocab); 2507 critiques fixed-vocabulary tokenization and claims a tokenizer-free model matching a BPE Transformer beyond 1B params. Moshi does not state a BPE pipeline, so it must not be credited. RETRIEVAL MISS: 1706.03762v7-0017 did not appear in top-8 for this phrasing (2507 chunks dominated) - gold answer verified to exist in the chunk, just not retrieved."
+  },
+  {
+   "id": "Q13",
+   "question": "What is the capital of France?",
+   "paper": null,
+   "expect": "unanswerable",
+   "gold_section_path": null,
+   "gold_chunk_ids": [],
+   "required_facts": [],
+   "forbidden_facts": [
+    "Paris"
+   ],
+   "notes": "UNANSWERABLE (off-topic). Corpus is three ML papers. BM25 still returns 5-8 chunks (top score 11.07, all Moshi); with --rerank --score-floor 0 the result set is empty and n_below_floor=25, which is the desired loud failure."
+  },
+  {
+   "id": "Q15",
+   "question": "What BLEU score does H-Net report for English-to-German translation?",
+   "paper": "2507.07955",
+   "expect": "unanswerable",
+   "gold_section_path": null,
+   "gold_chunk_ids": [],
+   "required_facts": [],
+   "forbidden_facts": [
+    "28.4",
+    "27.3"
+   ],
+   "notes": "UNANSWERABLE (plausible-but-absent). H-Net reports BPB/perplexity only - verified: the string 'BLEU' appears in zero 2507 chunks. Forbidden values are the Transformer's BLEU numbers, which is exactly what a hallucinated answer would borrow."
+  },
+  {
+   "id": "Q16",
+   "question": "What word error rate does the big Transformer achieve on English-to-German?",
+   "paper": "1706.03762",
+   "expect": "unanswerable",
+   "gold_section_path": null,
+   "gold_chunk_ids": [],
+   "required_facts": [],
+   "forbidden_facts": [
+    "28.4"
+   ],
+   "notes": "UNANSWERABLE (adversarial, sits next to a real number). 1706 reports BLEU only; 'WER' appears in zero 1706 chunks. WER does exist in the corpus (Moshi, 2410.00037v1-0101..0103), so a lazy model may answer from the wrong paper. Top BM25 hits are the BLEU tables (0025, 0023) - 28.4 is one token away."
+  }
+ ]
+}

@@ -1,0 +1,243 @@
+{
+ "corpus": "chunks.jsonl (6000-char pieces, 225 chunks)",
+ "metric": "recall of gold_chunk_ids in top-k, BM25 plus boosts",
+ "per_k": {
+  "4": {
+   "mean_recall": 0.848,
+   "perfect": 9,
+   "questions": 12,
+   "rows": [
+    {
+     "qid": "Q01",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q02",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q03",
+     "gold": 2,
+     "found": 1,
+     "recall": 0.5
+    },
+    {
+     "qid": "Q04",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q05",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q06",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q07",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q08",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q09",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q10",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q11",
+     "gold": 3,
+     "found": 0,
+     "recall": 0.0
+    },
+    {
+     "qid": "Q12",
+     "gold": 3,
+     "found": 2,
+     "recall": 0.67
+    }
+   ]
+  },
+  "6": {
+   "mean_recall": 0.848,
+   "perfect": 9,
+   "questions": 12,
+   "rows": [
+    {
+     "qid": "Q01",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q02",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q03",
+     "gold": 2,
+     "found": 1,
+     "recall": 0.5
+    },
+    {
+     "qid": "Q04",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q05",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q06",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q07",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q08",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q09",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q10",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q11",
+     "gold": 3,
+     "found": 0,
+     "recall": 0.0
+    },
+    {
+     "qid": "Q12",
+     "gold": 3,
+     "found": 2,
+     "recall": 0.67
+    }
+   ]
+  },
+  "8": {
+   "mean_recall": 0.848,
+   "perfect": 9,
+   "questions": 12,
+   "rows": [
+    {
+     "qid": "Q01",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q02",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q03",
+     "gold": 2,
+     "found": 1,
+     "recall": 0.5
+    },
+    {
+     "qid": "Q04",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q05",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q06",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q07",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q08",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q09",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q10",
+     "gold": 1,
+     "found": 1,
+     "recall": 1.0
+    },
+    {
+     "qid": "Q11",
+     "gold": 3,
+     "found": 0,
+     "recall": 0.0
+    },
+    {
+     "qid": "Q12",
+     "gold": 3,
+     "found": 2,
+     "recall": 0.67
+    }
+   ]
+  }
+ }
+}
