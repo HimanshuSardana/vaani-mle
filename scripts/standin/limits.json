@@ -1,0 +1,17 @@
+{
+  "org": "org_01j4f5qxt6ehjrv71h1wdry0z0",
+  "service_tier": "on_demand",
+  "default": {
+    "rpm": 30,
+    "tpm": 8000,
+    "rpd": 1000,
+    "tpd": 200000,
+    "concurrency": 8
+  },
+  "models": {
+    "openai/gpt-oss-20b":            { "rpm": 30,   "tpm": 8000, "rpd": 1000, "tpd": 200000, "concurrency": 8 },
+    "openai/gpt-oss-safeguard-20b":  { "rpm": 3,    "tpm": 2000, "rpd": 1000, "tpd": 200000, "concurrency": 4 },
+    "allam-2-7b":                    { "rpm": 30,   "tpm": 8000, "rpd": 1000, "tpd": 200000, "concurrency": 8 },
+    "qwen/qwen3.8-27b":              { "rpm": 30,   "tpm": 8000, "rpd": 1000, "tpd": 200000, "concurrency": 8 }
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "seed": 1337,
+  "method": "seeded conditional bootstrap, stratified by tokens_in band",
+  "sources": [
+    "ttft.jsonl",
+    "probe.jsonl",
+    "traces/trace_real.jsonl"
+  ],
+  "ttft_bands": {
+    "<400": {
+      "n": 33,
+      "samples_ms": [
+        192.9,
+        208.3,
+        217.3,
+        220.4,
+        229.4,
+        257.2,
+        332.0,
+        353.3,
+        385.5,
+        403.9,
+        510.8,
+        550.6,
+        561.3,
+        592.1,
+        604.2,
+        612.4,
+        643.4,
+        741.1,
+        785.9,
+        801.4,
+        815.2,
+        830.1,
+        848.4,
+        861.7,
+        874.7,
+        938.4,
+        988.3,
+        1045.4,
+        1397.0,
+        1566.3,
+        1590.0,
+        1636.7,
+        2263.0
+      ]
+    },
+    "400-900": {
+      "n": 5,
+      "samples_ms": [
+        409.6,
+        672.8,
+        1901.4,
+        1913.6,
+        2015.2
+      ]
+    },
+    "900-1600": {
+      "n": 6,
+      "samples_ms": [
+        485.5,
+        873.2,
+        957.3,
+        973.4,
+        973.7,
+        985.4
+      ]
+    },
+    ">1600": {
+      "n": 1,
+      "samples_ms": [
+        997.6
+      ]
+    }
+  },
+  "limitation": "samples are drawn only from observed values: no band can produce a TTFT slower than its observed maximum, so slow tails are reproduced, not invented. Bands with fewer than 8 observations are pooled with their neighbours at sample time, otherwise a 6-sample band cannot express the service's slow tail at all",
+  "sparse_band_threshold": 8,
+  "tokenizer": {
+    "encoding": "cl100k_base",
+    "template_overhead_tokens": {
+      "gpt-oss-20b": 70,
+      "qwen3.8-27b": 40.0,
+      "allam-2-7b": 10,
+      "gpt-oss-safeguard-20b": 70.0
+    },
+    "mean_relative_error_raw_by_band": {
+      "<400": 0.5965,
+      "400-900": 0.0928,
+      "900-1600": 0.0595,
+      ">1600": 0.0259
+    },
+    "mean_relative_error_after_overhead_by_band": {
+      "<400": 0.0001,
+      "400-900": 0.001,
+      "900-1600": 0.0002,
+      ">1600": 0.0004
+    },
+    "n_by_band": {
+      "<400": 33,
+      "400-900": 5,
+      "900-1600": 3,
+      ">1600": 1
+    },
+    "note": "error is measured on reconstructable probe/ttft prompts only (filler-heavy); dense pipeline prompts with citations and math are not represented"
+  },
+  "inter_token": {
+    "measured_gap_ms_p50": 0.3057,
+    "target_tokens_per_sec": 128.0,
+    "gap_ms": 0.3057,
+    "note": "the measured per-token floor is the calibrated number; the 128 tok/s figure is tokens_out/total_ms, which is dominated by TTFT, so it emerges from TTFT + completion length rather than from the cadence"
+  },
+  "tokens_out": {
+    "p10": 40,
+    "p50": 100,
+    "p90": 151,
+    "mean": 91.0,
+    "n": 32,
+    "samples": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      84,
+      92,
+      95,
+      98,
+      100,
+      100,
+      101,
+      102,
+      104,
+      106,
+      115,
+      118,
+      137,
+      149,
+      149,
+      151,
+      152,
+      152,
+      163,
+      164
+    ]
+  },
+  "tokens_out_short": {
+    "p10": 40,
+    "p50": 40,
+    "p90": 40,
+    "mean": 40.0,
+    "n": 12,
+    "samples": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40
+    ]
+  },
+  "tokens_out_draft": {
+    "p10": 84,
+    "p50": 137,
+    "p90": 137,
+    "mean": 123.3,
+    "n": 3,
+    "samples": [
+      84,
+      137,
+      149
+    ],
+    "source": "traces/trace_real.jsonl draft_tokens_out only"
+  },
+  "measured_gap_ms_p50": 0.5587
+}
