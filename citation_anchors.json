@@ -1,0 +1,189 @@
+{
+ "n_citations": 5,
+ "summary": {
+  "exact": 3,
+  "normalised": 1,
+  "prefix8": 1,
+  "page": 0,
+  "unresolved": 0,
+  "auto_span": 0
+ },
+ "anchors": [
+  {
+   "answer_id": "95bd8777bd584b9a",
+   "paper": "2507.07955",
+   "section": "2 H-Net Architecture > 2.2 Dynamic Chunking (DC) > 2.2.3 Ratio Loss",
+   "page": 8,
+   "quote": "Without explicit regularization, the model may converge to trivial solutions: either retaining nearly all vectors (negating computational benefits) or compressing excessively (losing critical information).",
+   "chunk_id": "2507.07955v2-0164",
+   "claim": "The ratio loss is introduced to prevent the dynamic chunking module from converging to trivial solutions, such as keeping almost all vectors or compressing too aggressively, which would either waste computation or lose essential information [2507.07955 \u00a72 H-Net Architecture > 2.2 Dynamic Chunking (DC) > 2.2.3 Ratio Loss p8] \"Without explicit regularization, the model may converge to trivial solutions: either retaining nearly all vectors (negating computational benefits) or compressing excessively (losing critical information).\".",
+   "status": "quoted",
+   "stage": 1,
+   "rects": [
+    [
+     71.52,
+     302.03,
+     561.6,
+     311.99
+    ],
+    [
+     72.0,
+     314.08,
+     391.39,
+     323.94
+    ]
+   ],
+   "page_used": 8
+  },
+  {
+   "answer_id": "95bd8777bd584b9a",
+   "paper": "2507.07955",
+   "section": "2 H-Net Architecture > 2.2 Dynamic Chunking (DC) > 2.2.3 Ratio Loss",
+   "page": 8,
+   "quote": "Without explicit regularization, the model may converge to trivial solutions: either retaining nearly all vectors (negating computational benefits) or compressing excessively (losing critical information).",
+   "chunk_id": "2507.07955v2-0164",
+   "claim": "The ratio loss is introduced to prevent the dynamic chunking module from converging to trivial solutions, such as keeping almost all vectors or compressing too aggressively, which would either waste computation or lose essential information [2507.07955 \u00a72 H-Net Architecture > 2.2 Dynamic Chunking (DC) > 2.2.3 Ratio Loss p8] \"Without explicit regularization, the model may converge to trivial solutions: either retaining nearly all vectors (negating computational benefits) or compressing excessively (losing critical information).\".",
+   "status": "quoted",
+   "stage": 1,
+   "rects": [
+    [
+     71.52,
+     302.03,
+     561.6,
+     311.99
+    ],
+    [
+     72.0,
+     314.08,
+     391.39,
+     323.94
+    ]
+   ],
+   "page_used": 8
+  },
+  {
+   "answer_id": "95bd8777bd584b9a",
+   "paper": "2507.07955",
+   "section": "1 Introduction > Dynamic Chunking: End-to-end Sequence Modeling Without Tokenization > Dynamic Chunking.",
+   "page": 2,
+   "quote": "DC lets an H\u2011Net learn how to compress data in a fully end\u2011to\u2011end fashion.",
+   "chunk_id": "2507.07955v2-0149",
+   "claim": "",
+   "status": "quoted",
+   "stage": 2,
+   "rects": [
+    [
+     437.21,
+     587.23,
+     561.6,
+     597.2
+    ],
+    [
+     72.0,
+     599.19,
+     250.73,
+     609.16
+    ]
+   ],
+   "page_used": 2
+  },
+  {
+   "answer_id": "0900bdfeaaac4a58",
+   "paper": "1706.03762",
+   "section": "6 Results > 6.1 Machine Translation",
+   "page": 8,
+   "quote": "Transformer (big) 28.4 41.8 2.3\\cdot 10^{19}",
+   "chunk_id": "1706.03762v7-0023",
+   "claim": "The big Transformer achieves a BLEU score of 28.4 on English\u2011to\u2011German [1706.03762 \u00a76 Results > 6.1 Machine Translation p8] \"Transformer (big) 28.4 41.8 2.3\\cdot 10^{19}\".",
+   "status": "quoted",
+   "stage": 3,
+   "rects": [
+    [
+     136.67,
+     230.59,
+     207.97,
+     240.55
+    ],
+    [
+     294.94,
+     230.49,
+     312.38,
+     240.46
+    ],
+    [
+     336.23,
+     230.49,
+     353.66,
+     240.46
+    ]
+   ],
+   "page_used": 8
+  },
+  {
+   "answer_id": "e7f2e2f64143405d",
+   "paper": "2507.07955",
+   "section": "3 Experiments > 3.2 Alternate Language Datasets > Experimental setup for Chinese and code.",
+   "page": 17,
+   "quote": "H-Net ( M3T1 + T15 + M4 ) 64M 2.705",
+   "chunk_id": "2507.07955v2-0186",
+   "claim": "",
+   "status": "quoted",
+   "stage": 1,
+   "rects": [
+    [
+     79.93,
+     318.67,
+     188.16,
+     328.0
+    ],
+    [
+     207.88,
+     318.67,
+     224.38,
+     328.0
+    ],
+    [
+     256.47,
+     318.67,
+     275.87,
+     328.0
+    ]
+   ],
+   "page_used": 17
+  }
+ ],
+ "failures": [
+  {
+   "answer_id": "0900bdfeaaac4a58",
+   "paper": "1706.03762",
+   "section": "6 Results > 6.1 Machine Translation",
+   "page": 8,
+   "quote": "Transformer (big) 28.4 41.8 2.3\\cdot 10^{19}",
+   "chunk_id": "1706.03762v7-0023",
+   "claim": "The big Transformer achieves a BLEU score of 28.4 on English\u2011to\u2011German [1706.03762 \u00a76 Results > 6.1 Machine Translation p8] \"Transformer (big) 28.4 41.8 2.3\\cdot 10^{19}\".",
+   "status": "quoted",
+   "stage": 3,
+   "rects": [
+    [
+     136.67,
+     230.59,
+     207.97,
+     240.55
+    ],
+    [
+     294.94,
+     230.49,
+     312.38,
+     240.46
+    ],
+    [
+     336.23,
+     230.49,
+     353.66,
+     240.46
+    ]
+   ],
+   "page_used": 8
+  }
+ ]
+}
